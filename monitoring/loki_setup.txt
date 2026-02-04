@@ -1,0 +1,30 @@
+Loki Setup (Local Docker)
+
+1. Started Loki using Docker:
+
+docker run -d \
+  --name loki \
+  -p 3100:3100 \
+  grafana/loki:2.9.4 \
+  -config.file=/etc/loki/local-config.yaml
+
+Loki runs on http://localhost:3100
+
+2. Started Promtail to forward Docker container logs to Loki:
+
+docker run -d \
+  --name promtail \
+  -v /var/lib/docker/containers:/var/lib/docker/containers:ro \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  grafana/promtail:2.9.4 \
+  -config.file=/etc/promtail/docker-config.yaml
+
+3. Ran application container to generate logs:
+
+docker run --rm hello-python
+
+4. Viewed logs using logcli:
+
+docker run --rm grafana/logcli:2.9.4 \
+  --addr="http://host.docker.internal:3100" \
+  query '{job="docker"}'
